@@ -10,8 +10,22 @@
     <!-- 自定义配置 -->
     <custom>
         <fluidoSkin>
-            <topBarEnabled>false</topBarEnabled>
+            <!-- 启用顶部导航栏 -->
+            <topBarEnabled>true</topBarEnabled>
+            <!-- 顶部栏容器宽度设置为90% -->
+            <topBarContainerStyle>width: 90%;</topBarContainerStyle>
+            <!-- 顶部栏图标配置 -->
+            <topBarIcon>
+                <name>deepchat</name>
+                <alt>deepchat</alt>
+                <href>/index.html</href>
+            </topBarIcon>
+            <!-- 启用侧边栏 -->
             <sideBarEnabled>true</sideBarEnabled>
+            <!-- 启用 Google 搜索功能 -->
+            <googleSearch></googleSearch>
+            <!-- 启用代码行号显示 -->
+            <sourceLineNumbersEnabled>true</sourceLineNumbersEnabled>
         </fluidoSkin>
     </custom>
     
