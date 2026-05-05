@@ -1,60 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/DECORATION/1.8.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.0 
-         http://maven.apache.org/xsd/decoration-1.8.0.xsd">
-    
+<project xmlns="http://maven.apache.org/DECORATION/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/DECORATION/2.0.0 https://maven.apache.org/xsd/decoration-2.0.0.xsd">
     <skin>
         <groupId>org.apache.maven.skins</groupId>
         <artifactId>maven-fluido-skin</artifactId>
-        <version>1.11.1</version>
+        <version>2.0.0-M9</version>
     </skin>
-    
-    <bannerLeft>
-        <name>DeepChat</name>
-        <href>index.html</href>
-    </bannerLeft>
-    
     <body>
-        <!-- 顶部菜单 -->
-        <menu name="项目信息">
-            <item name="首页" href="index.html"/>
-            <item name="项目摘要" href="summary.html"/>
-            <item name="依赖信息" href="dependencies.html"/>
-            <item name="插件信息" href="plugins.html"/>
-        </menu>
-        
-        <!-- 文档分类菜单 -->
-        <menu name="快速开始" ref="docs/01-快速开始"/>
-        <menu name="RAG知识库" ref="docs/02-RAG知识库"/>
-        <menu name="聊天记忆" ref="docs/03-聊天记忆"/>
-        <menu name="AI模型集成" ref="docs/04-AI模型集成"/>
-        <menu name="前端集成" ref="docs/05-前端集成"/>
-        <menu name="问题修复" ref="docs/06-问题修复"/>
-        <menu name="构建与部署" ref="docs/07-构建与部署"/>
-        <menu name="测试脚本" ref="docs/08-测试脚本"/>
-        
-        <!-- 快速链接 -->
-        <menu name="快速链接">
-            <item name="📖 RAG 速查表" href="docs/02-RAG知识库/RAG_CHEATSHEET.html"/>
-            <item name="🚀 RAG 快速开始" href="docs/01-快速开始/RAG_QUICKSTART.html"/>
-            <item name="💬 聊天记忆指南" href="docs/03-聊天记忆/CHAT_MEMORY_GUIDE.html"/>
-            <item name="🤖 DeepSeek 集成" href="docs/04-AI模型集成/DEEPSEEK_INTEGRATION.html"/>
-        </menu>
-        
-        <!-- 外部链接 -->
-        <menu name="相关链接" inherit="bottom">
-            <item name="Spring AI" href="https://spring.io/projects/spring-ai"/>
-            <item name="Spring Boot" href="https://spring.io/projects/spring-boot"/>
-            <item name="GitHub" href="https://github.com/spring-projects/spring-ai"/>
+        <menu ref="parent" />
+        <menu name="报告" ref="reports" />
+        <menu name="的对方的">
+            <item name="的地方" href="foo.html" />
+            <item name="FAQ" href="faq.html" />
         </menu>
     </body>
-    
-    <!-- 自定义 CSS -->
-    <custom>
-        <fluidoSkin>
-            <topBarEnabled>true</topBarEnabled>
-            <sideBarEnabled>true</sideBarEnabled>
-        </fluidoSkin>
-    </custom>
 </project>
