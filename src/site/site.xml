@@ -7,11 +7,63 @@
         <version>2.0.0-M9</version>
     </skin>
     <body>
+        <menu name="概览">
+            <item name="项目说明" href="docs/README.html" />
+            <item name="使用指南" href="docs/Maven_Site_使用说明.html" />
+            <item name="整理报告" href="docs/文档整理报告.html" />
+        </menu>
+        
+        <menu name="快速开始">
+            <item name="帮助文档" href="docs/01-快速开始/HELP.html" />
+            <item name="聊天记忆快速入门" href="docs/01-快速开始/QUICKSTART_CHAT_MEMORY.html" />
+            <item name="DeepSeek快速入门" href="docs/01-快速开始/QUICKSTART_DEEPSEEK.html" />
+            <item name="RAG快速入门" href="docs/01-快速开始/RAG_QUICKSTART.html" />
+        </menu>
+        
+        <menu name="RAG知识库">
+            <item name="架构设计" href="docs/02-RAG知识库/RAG_ARCHITECTURE.html" />
+            <item name="速查表" href="docs/02-RAG知识库/RAG_CHEATSHEET.html" />
+            <item name="方案对比" href="docs/02-RAG知识库/RAG_COMPARISON.html" />
+            <item name="依赖修复" href="docs/02-RAG知识库/RAG_DEPENDENCY_FIX.html" />
+            <item name="部署指南" href="docs/02-RAG知识库/RAG_DEPLOYMENT.html" />
+            <item name="索引说明" href="docs/02-RAG知识库/RAG_INDEX.html" />
+            <item name="集成指南" href="docs/02-RAG知识库/RAG_INTEGRATION.html" />
+            <item name="总结" href="docs/02-RAG知识库/RAG_SUMMARY.html" />
+            <item name="故障排查" href="docs/02-RAG知识库/RAG_TROUBLESHOOTING.html" />
+        </menu>
+        
+        <menu name="聊天记忆">
+            <item name="使用指南" href="docs/03-聊天记忆/CHAT_MEMORY_GUIDE.html" />
+            <item name="实现总结" href="docs/03-聊天记忆/CHAT_MEMORY_IMPLEMENTATION_SUMMARY.html" />
+            <item name="查看历史" href="docs/03-聊天记忆/VIEW_CHAT_HISTORY.html" />
+        </menu>
+        
+        <menu name="AI模型集成">
+            <item name="DeepSeek集成" href="docs/04-AI模型集成/DEEPSEEK_INTEGRATION.html" />
+            <item name="集成总结" href="docs/04-AI模型集成/DEEPSEEK_INTEGRATION_SUMMARY.html" />
+            <item name="Spring AI集成" href="docs/04-AI模型集成/SPRING_AI_INTEGRATION.html" />
+        </menu>
+        
+        <menu name="前端集成">
+            <item name="404错误修复" href="docs/05-前端集成/FIX_404_ERROR.html" />
+            <item name="集成指南" href="docs/05-前端集成/FRONTEND_INTEGRATION.html" />
+        </menu>
+        
+        <menu name="问题修复">
+            <item name="Maven依赖问题" href="docs/06-问题修复/FIX_MAVEN_DEPENDENCY_ISSUE.html" />
+            <item name="Spring Boot兼容性" href="docs/06-问题修复/FIX_SPRING_BOOT_COMPATIBILITY.html" />
+            <item name="流式响应修复" href="docs/06-问题修复/FIX_STREAMING_RESPONSE.html" />
+            <item name="修复总结" href="docs/06-问题修复/FIX_SUCCESS.html" />
+        </menu>
+        
+        <menu name="构建与部署">
+            <item name="AOT指南" href="docs/07-构建与部署/AOT_GUIDE.html" />
+            <item name="清理总结" href="docs/07-构建与部署/CLEANUP_SUMMARY.html" />
+            <item name="原生构建排查" href="docs/07-构建与部署/NATIVE_BUILD_TROUBLESHOOTING.html" />
+        </menu>
+        
         <menu ref="parent" />
         <menu name="报告" ref="reports" />
-        <menu name="的对方的">
-            <item name="的地方" href="foo.html" />
-            <item name="FAQ" href="faq.html" />
-        </menu>
+        
     </body>
 </project>
