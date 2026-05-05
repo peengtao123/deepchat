@@ -3,7 +3,6 @@ package com.example.demo.service;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,13 +13,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * RAG (Retrieval-Augmented Generation) 服务
  * 提供文档索引、检索和问答功能
  */
 @Service
+@SuppressWarnings("unused")
 public class RagService {
 
     @Autowired
@@ -35,6 +34,10 @@ public class RagService {
      * @param metadata 元数据（如来源、标题等）
      */
     public void addTextDocument(String text, String... metadata) {
+        if (text == null || text.trim().isEmpty()) {
+            throw new IllegalArgumentException("文本内容不能为空");
+        }
+        
         Document document = new Document(text);
         
         // 添加元数据
@@ -55,6 +58,9 @@ public class RagService {
      * @param documents 文档列表
      */
     public void addDocuments(List<Document> documents) {
+        if (documents == null || documents.isEmpty()) {
+            throw new IllegalArgumentException("文档列表不能为空");
+        }
         vectorStore.add(documents);
     }
 

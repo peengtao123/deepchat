@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -22,7 +23,7 @@ public class SpringAIService {
      * @param message 用户消息
      * @return AI响应
      */
-    public String chat(String message) {
+    public String chat(@NonNull String message) {
         return chatClient.prompt()
                 .user(message)
                 .call()
@@ -35,7 +36,7 @@ public class SpringAIService {
      * @param userMessage 用户消息
      * @return AI响应
      */
-    public String chatWithSystem(String systemMessage, String userMessage) {
+    public String chatWithSystem(@NonNull String systemMessage, @NonNull String userMessage) {
         return chatClient.prompt()
                 .system(systemMessage)
                 .user(userMessage)
@@ -48,7 +49,7 @@ public class SpringAIService {
      * @param message 用户消息
      * @return 流式AI响应
      */
-    public Flux<String> chatStream(String message) {
+    public Flux<String> chatStream(@NonNull String message) {
         return chatClient.prompt()
                 .user(message)
                 .stream()
@@ -61,7 +62,7 @@ public class SpringAIService {
      * @param userMessage 用户消息
      * @return 流式AI响应
      */
-    public Flux<String> chatStreamWithSystem(String systemMessage, String userMessage) {
+    public Flux<String> chatStreamWithSystem(@NonNull String systemMessage, @NonNull String userMessage) {
         return chatClient.prompt()
                 .system(systemMessage)
                 .user(userMessage)
@@ -75,7 +76,7 @@ public class SpringAIService {
      * @param message 用户消息
      * @return AI响应
      */
-    public String chatWithMemory(String sessionId, String message) {
+    public String chatWithMemory(@NonNull String sessionId, @NonNull String message) {
         // 添加用户消息到历史
         chatMemoryService.addUserMessage(sessionId, message);
         
@@ -103,7 +104,7 @@ public class SpringAIService {
      * @param userMessage 用户消息
      * @return AI响应
      */
-    public String chatWithMemoryAndSystem(String sessionId, String systemMessage, String userMessage) {
+    public String chatWithMemoryAndSystem(@NonNull String sessionId, @NonNull String systemMessage, @NonNull String userMessage) {
         // 添加用户消息到历史
         chatMemoryService.addUserMessage(sessionId, userMessage);
         
@@ -131,7 +132,7 @@ public class SpringAIService {
      * @param message 用户消息
      * @return 流式AI响应
      */
-    public Flux<String> chatStreamWithMemory(String sessionId, String message) {
+    public Flux<String> chatStreamWithMemory(@NonNull String sessionId, @NonNull String message) {
         // 添加用户消息到历史
         chatMemoryService.addUserMessage(sessionId, message);
         
@@ -162,7 +163,7 @@ public class SpringAIService {
      * @param userMessage 用户消息
      * @return 流式AI响应
      */
-    public Flux<String> chatStreamWithMemoryAndSystem(String sessionId, String systemMessage, String userMessage) {
+    public Flux<String> chatStreamWithMemoryAndSystem(@NonNull String sessionId, @NonNull String systemMessage, @NonNull String userMessage) {
         // 添加用户消息到历史
         chatMemoryService.addUserMessage(sessionId, userMessage);
         
@@ -191,7 +192,7 @@ public class SpringAIService {
      * 清除指定会话的记忆
      * @param sessionId 会话ID
      */
-    public void clearSessionMemory(String sessionId) {
+    public void clearSessionMemory(@NonNull String sessionId) {
         chatMemoryService.clearMemory(sessionId);
     }
 }
