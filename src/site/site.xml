@@ -6,6 +6,15 @@
         <artifactId>maven-fluido-skin</artifactId>
         <version>2.0.0-M9</version>
     </skin>
+    
+    <!-- 自定义配置 -->
+    <custom>
+        <fluidoSkin>
+            <topBarEnabled>false</topBarEnabled>
+            <sideBarEnabled>true</sideBarEnabled>
+        </fluidoSkin>
+    </custom>
+    
     <body>
         <menu name="概览">
             <item name="项目说明" href="docs/README.html" />
@@ -61,7 +70,7 @@
             <item name="清理总结" href="docs/07-构建与部署/CLEANUP_SUMMARY.html" />
             <item name="原生构建排查" href="docs/07-构建与部署/NATIVE_BUILD_TROUBLESHOOTING.html" />
         </menu>
-        
+
         <menu ref="parent" />
         <menu name="报告" ref="reports" />
         
