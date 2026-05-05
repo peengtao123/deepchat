@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LangChain4j AI 聊天</title>
+    <title>Spring AI 聊天</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -68,19 +68,34 @@
             text-align: center;
             color: #666;
         }
+        .streaming-cursor::after {
+            content: '|';
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
     </style>
 </head>
 <body>
     <div class="chat-container">
-        <h1>LangChain4j AI 聊天</h1>
+        <h1>🤖 Spring AI 聊天助手</h1>
         <div class="messages" id="messages"></div>
         <div class="input-area">
             <input type="text" id="messageInput" placeholder="输入消息..." />
             <button onclick="sendMessage()" id="sendBtn">发送</button>
         </div>
+        <div style="margin-top: 10px;">
+            <label>
+                <input type="checkbox" id="streamMode" checked> 启用流式响应
+            </label>
+        </div>
     </div>
 
     <script>
+        // API 基础路径
+        const API_BASE = '/api/spring-ai';
         function addMessage(text, isUser) {
             const messagesDiv = document.getElementById('messages');
             const messageDiv = document.createElement('div');
@@ -88,11 +103,13 @@
             messageDiv.textContent = text;
             messagesDiv.appendChild(messageDiv);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            return messageDiv;
         }
 
         async function sendMessage() {
             const input = document.getElementById('messageInput');
             const sendBtn = document.getElementById('sendBtn');
+            const streamMode = document.getElementById('streamMode').checked;
             const message = input.value.trim();
             
             if (!message) return;
@@ -114,30 +131,116 @@
             messagesDiv.appendChild(loadingDiv);
             
             try {
-                const response = await fetch('/api/ai/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ message: message })
-                });
-                
-                const data = await response.json();
-                
-                // 移除加载提示
-                document.getElementById('loading').remove();
-                
-                if (data.response) {
-                    addMessage(data.response, false);
-                } else if (data.error) {
-                    addMessage('错误: ' + data.error, false);
+                if (streamMode) {
+                    // 使用流式响应
+                    await sendStreamMessage(message);
+                } else {
+                    // 使用普通响应
+                    await sendNormalMessage(message);
                 }
             } catch (error) {
-                document.getElementById('loading').remove();
+                document.getElementById('loading')?.remove();
                 addMessage('请求失败: ' + error.message, false);
             } finally {
                 sendBtn.disabled = false;
                 sendBtn.textContent = '发送';
+            }
+        }
+        
+        async function sendNormalMessage(message) {
+            const response = await fetch(`${API_BASE}/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: message })
+            });
+            
+            const data = await response.json();
+            
+            // 移除加载提示
+            document.getElementById('loading').remove();
+            
+            if (data.response) {
+                addMessage(data.response, false);
+            } else if (data.error) {
+                addMessage('错误: ' + data.error, false);
+            }
+        }
+        
+        async function sendStreamMessage(message) {
+            // 创建空的AI消息容器
+            const aiMessageDiv = addMessage('', false);
+            aiMessageDiv.classList.add('streaming-cursor');
+            
+            // 移除加载提示
+            document.getElementById('loading').remove();
+            
+            // 使用 fetch + ReadableStream 处理流式响应
+            const response = await fetch(`${API_BASE}/chat-stream`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: message })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let accumulatedText = '';
+            let buffer = ''; // 添加缓冲区处理不完整的数据行
+            
+            try {
+                while (true) {
+                    const { done, value } = await reader.read();
+                    console.log('done:', value)
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value, { stream: true });
+                    buffer += chunk; // 将新数据添加到缓冲区
+                    
+                    // 按行分割缓冲区
+                    const lines = buffer.split('\n');
+                    // 保留最后一个不完整的行在缓冲区中
+                    buffer = lines.pop() || '';
+                    
+                    // 处理完整的行
+                    for (const line of lines) {
+                        const trimmedLine = line.trim();
+                        if (trimmedLine.startsWith('data:')) {
+                            // 支持 "data:" 和 "data: " 两种格式
+                            const data = trimmedLine.startsWith('data: ') 
+                                ? trimmedLine.slice(6) 
+                                : trimmedLine.slice(5);
+                            if (data && data !== '[DONE]') {
+                                accumulatedText += data;
+                                aiMessageDiv.textContent = accumulatedText;
+                                // 滚动到底部
+                                const messagesDiv = document.getElementById('messages');
+                                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                            }
+                        }
+                    }
+                }
+                
+                // 处理缓冲区中剩余的数据
+                if (buffer.trim()) {
+                    const trimmedLine = buffer.trim();
+                    if (trimmedLine.startsWith('data: ')) {
+                        const data = trimmedLine.slice(6);
+                        if (data && data !== '[DONE]') {
+                            accumulatedText += data;
+                            aiMessageDiv.textContent = accumulatedText;
+                        }
+                    }
+                }
+            } finally {
+                reader.releaseLock();
+                aiMessageDiv.classList.remove('streaming-cursor');
             }
         }
 
