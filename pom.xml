@@ -48,12 +48,6 @@
             <artifactId>spring-ai-core</artifactId>
         </dependency>
 
-        <!-- Spring AI Chat Memory -->
-        <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-client-chat</artifactId>
-        </dependency>
-
     </dependencies>
 
     <dependencyManagement>

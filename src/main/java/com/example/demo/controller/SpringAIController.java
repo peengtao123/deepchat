@@ -20,6 +20,9 @@ public class SpringAIController {
     @Autowired
     private SpringAIService springAIService;
 
+    @Autowired
+    private com.example.demo.service.ChatMemoryService chatMemoryService;
+
     /**
      * 简单聊天接口
      * @param request 包含message的请求体
@@ -274,6 +277,30 @@ public class SpringAIController {
         result.put("success", true);
         result.put("message", "会话记忆已清除");
         result.put("sessionId", sessionId);
+        return result;
+    }
+
+    /**
+     * 获取会话历史接口
+     * @param request 包含sessionId的请求体
+     * @return 会话历史列表
+     */
+    @PostMapping("/get-history")
+    public Map<String, Object> getHistory(@RequestBody Map<String, String> request) {
+        String sessionId = request.get("sessionId");
+        
+        if (sessionId == null || sessionId.trim().isEmpty()) {
+            sessionId = "default-session";
+        }
+
+        // 获取会话历史
+        java.util.List<java.util.Map<String, String>> history = 
+            chatMemoryService.getSessionHistory(sessionId);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("sessionId", sessionId);
+        result.put("history", history);
+        result.put("count", history.size());
         return result;
     }
 }

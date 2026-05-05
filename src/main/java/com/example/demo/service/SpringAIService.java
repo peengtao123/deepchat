@@ -1,7 +1,6 @@
 package com.example.demo.service;
 
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -77,13 +76,24 @@ public class SpringAIService {
      * @return AI响应
      */
     public String chatWithMemory(String sessionId, String message) {
-        ChatMemory memory = chatMemoryService.getOrCreateMemory(sessionId);
+        // 添加用户消息到历史
+        chatMemoryService.addUserMessage(sessionId, message);
         
-        return chatClient.prompt()
-                .user(message)
-                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, sessionId))
+        // 获取格式化的历史
+        String history = chatMemoryService.getFormattedHistory(sessionId);
+        
+        // 构建包含历史的prompt
+        String prompt = "以下是之前的对话历史：\n" + history + "\n\n用户当前问题：" + message;
+        
+        String response = chatClient.prompt()
+                .user(prompt)
                 .call()
                 .content();
+        
+        // 添加AI响应到历史
+        chatMemoryService.addAssistantMessage(sessionId, response);
+        
+        return response;
     }
 
     /**
@@ -94,14 +104,25 @@ public class SpringAIService {
      * @return AI响应
      */
     public String chatWithMemoryAndSystem(String sessionId, String systemMessage, String userMessage) {
-        ChatMemory memory = chatMemoryService.getOrCreateMemory(sessionId);
+        // 添加用户消息到历史
+        chatMemoryService.addUserMessage(sessionId, userMessage);
         
-        return chatClient.prompt()
+        // 获取格式化的历史
+        String history = chatMemoryService.getFormattedHistory(sessionId);
+        
+        // 构建包含历史的prompt
+        String prompt = "以下是之前的对话历史：\n" + history + "\n\n用户当前问题：" + userMessage;
+        
+        String response = chatClient.prompt()
                 .system(systemMessage)
-                .user(userMessage)
-                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, sessionId))
+                .user(prompt)
                 .call()
                 .content();
+        
+        // 添加AI响应到历史
+        chatMemoryService.addAssistantMessage(sessionId, response);
+        
+        return response;
     }
 
     /**
@@ -111,13 +132,27 @@ public class SpringAIService {
      * @return 流式AI响应
      */
     public Flux<String> chatStreamWithMemory(String sessionId, String message) {
-        ChatMemory memory = chatMemoryService.getOrCreateMemory(sessionId);
+        // 添加用户消息到历史
+        chatMemoryService.addUserMessage(sessionId, message);
+        
+        // 获取格式化的历史
+        String history = chatMemoryService.getFormattedHistory(sessionId);
+        
+        // 构建包含历史的prompt
+        String prompt = "以下是之前的对话历史：\n" + history + "\n\n用户当前问题：" + message;
+        
+        // 使用 StringBuilder 累积完整响应
+        final StringBuilder fullResponse = new StringBuilder();
         
         return chatClient.prompt()
-                .user(message)
-                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, sessionId))
+                .user(prompt)
                 .stream()
-                .content();
+                .content()
+                .doOnNext(chunk -> fullResponse.append(chunk))
+                .doOnComplete(() -> {
+                    // 流完成后保存完整响应到历史
+                    chatMemoryService.addAssistantMessage(sessionId, fullResponse.toString());
+                });
     }
 
     /**
@@ -128,14 +163,28 @@ public class SpringAIService {
      * @return 流式AI响应
      */
     public Flux<String> chatStreamWithMemoryAndSystem(String sessionId, String systemMessage, String userMessage) {
-        ChatMemory memory = chatMemoryService.getOrCreateMemory(sessionId);
+        // 添加用户消息到历史
+        chatMemoryService.addUserMessage(sessionId, userMessage);
+        
+        // 获取格式化的历史
+        String history = chatMemoryService.getFormattedHistory(sessionId);
+        
+        // 构建包含历史的prompt
+        String prompt = "以下是之前的对话历史：\n" + history + "\n\n用户当前问题：" + userMessage;
+        
+        // 使用 StringBuilder 累积完整响应
+        final StringBuilder fullResponse = new StringBuilder();
         
         return chatClient.prompt()
                 .system(systemMessage)
-                .user(userMessage)
-                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, sessionId))
+                .user(prompt)
                 .stream()
-                .content();
+                .content()
+                .doOnNext(chunk -> fullResponse.append(chunk))
+                .doOnComplete(() -> {
+                    // 流完成后保存完整响应到历史
+                    chatMemoryService.addAssistantMessage(sessionId, fullResponse.toString());
+                });
     }
 
     /**

@@ -163,6 +163,88 @@
         .toggle-system-prompt {
             margin-bottom: 10px;
         }
+        /* 历史查看弹窗样式 */
+        .history-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .history-modal.active {
+            display: flex;
+        }
+        .history-content {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .history-header h2 {
+            margin: 0;
+            color: #667eea;
+            font-size: 24px;
+        }
+        .close-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: all 0.2s;
+        }
+        .close-btn:hover {
+            background: #ff5252;
+            transform: scale(1.1);
+        }
+        .history-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .history-item.user {
+            background-color: #e3f2fd;
+            border-left-color: #2196f3;
+        }
+        .history-item.assistant {
+            background-color: #f1f8e9;
+            border-left-color: #4caf50;
+        }
+        .history-role {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #666;
+        }
+        .history-text {
+            color: #333;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
@@ -208,9 +290,21 @@
             </div>
             <div class="option-group">
                 <button onclick="clearMessages()" style="padding: 8px 16px; font-size: 12px;">清空对话</button>
+                <button onclick="viewHistory()" style="padding: 8px 16px; font-size: 12px; background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">查看历史</button>
                 <button onclick="clearSessionMemory()" style="padding: 8px 16px; font-size: 12px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">清除记忆</button>
                 <button onclick="newSession()" style="padding: 8px 16px; font-size: 12px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">新会话</button>
             </div>
+        </div>
+    </div>
+
+    <!-- 历史查看弹窗 -->
+    <div id="historyModal" class="history-modal">
+        <div class="history-content">
+            <div class="history-header">
+                <h2>📜 对话历史</h2>
+                <button class="close-btn" onclick="closeHistory()">✕</button>
+            </div>
+            <div id="historyList"></div>
         </div>
     </div>
 
@@ -287,6 +381,67 @@
             // 显示欢迎消息
             addMessage('✨ 已创建新会话，让我们开始新的对话吧！', false);
         }
+
+        // 查看对话历史
+        async function viewHistory() {
+            try {
+                const response = await fetch(`${API_BASE}/get-history`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ sessionId: currentSessionId })
+                });
+                
+                const data = await response.json();
+                const historyList = document.getElementById('historyList');
+                
+                if (data.history && data.history.length > 0) {
+                    let html = `<p style="color: #666; margin-bottom: 15px;">共 ${data.count} 条消息</p>`;
+                    
+                    data.history.forEach((msg, index) => {
+                        const roleClass = msg.role === 'user' ? 'user' : 'assistant';
+                        const roleText = msg.role === 'user' ? '👤 用户' : '🤖 AI助手';
+                        
+                        html += `
+                            <div class="history-item ${roleClass}">
+                                <div class="history-role">${roleText}</div>
+                                <div class="history-text">${escapeHtml(msg.content)}</div>
+                            </div>
+                        `;
+                    });
+                    
+                    historyList.innerHTML = html;
+                } else {
+                    historyList.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">暂无对话历史</p>';
+                }
+                
+                // 显示弹窗
+                document.getElementById('historyModal').classList.add('active');
+            } catch (error) {
+                console.error('获取历史失败:', error);
+                alert('获取对话历史失败: ' + error.message);
+            }
+        }
+
+        // 关闭历史弹窗
+        function closeHistory() {
+            document.getElementById('historyModal').classList.remove('active');
+        }
+
+        // HTML转义函数
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 点击弹窗外部关闭
+        document.getElementById('historyModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeHistory();
+            }
+        });
 
         async function sendMessage() {
             const input = document.getElementById('messageInput');
