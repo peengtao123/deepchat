@@ -48,6 +48,12 @@
             <artifactId>spring-ai-core</artifactId>
         </dependency>
 
+        <!-- Spring AI Document Readers - 用于读取PDF、TXT等文档 -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-pdf-document-reader</artifactId>
+        </dependency>
+
     </dependencies>
 
     <dependencyManagement>

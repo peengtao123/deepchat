@@ -7,11 +7,23 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .main-wrapper {
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            position: relative;
+            transition: margin-left 0.3s ease;
+        }
+        .main-wrapper.sidebar-open {
+            margin-left: 280px;
         }
         .chat-container {
             background: white;
@@ -203,12 +215,49 @@
             font-size: 24px;
         }
         .close-btn {
-            background: #ff6b6b;
+            background: transparent;
+            color: #999;
+            border: 2px solid #e0e0e0;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .close-btn::before,
+        .close-btn::after {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 2px;
+            background-color: currentColor;
+            transition: all 0.3s ease;
+        }
+        .close-btn::before {
+            transform: rotate(45deg);
+        }
+        .close-btn::after {
+            transform: rotate(-45deg);
+        }
+        .close-btn:hover {
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+            transform: rotate(90deg);
+        }
+        .sidebar-close-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 50%;
-            width: 32px;
-            height: 32px;
+            width: 40px;
+            height: 40px;
             cursor: pointer;
             font-size: 20px;
             line-height: 1;
@@ -216,11 +265,28 @@
             align-items: center;
             justify-content: center;
             padding: 0;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
         }
-        .close-btn:hover {
-            background: #ff5252;
-            transform: scale(1.1);
+        .sidebar-close-btn::before,
+        .sidebar-close-btn::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 2px;
+            background-color: white;
+            transition: all 0.3s ease;
+        }
+        .sidebar-close-btn::before {
+            transform: rotate(45deg);
+        }
+        .sidebar-close-btn::after {
+            transform: rotate(-45deg);
+        }
+        .sidebar-close-btn:hover {
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
         }
         .history-item {
             padding: 12px;
@@ -245,10 +311,141 @@
             color: #333;
             line-height: 1.6;
         }
+        /* 会话侧边栏样式 */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 998;
+        }
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .sidebar {
+            position: fixed;
+            left: -100%;
+            top: 0;
+            width: 300px;
+            height: 100%;
+            background: white;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.2);
+            transition: left 0.3s ease;
+            z-index: 999;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .sidebar.active {
+            left: 0;
+        }
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .sidebar-header h3 {
+            margin: 0;
+            color: #667eea;
+        }
+        .session-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #e0e0e0;
+        }
+        .session-item:hover {
+            background-color: #f5f5f5;
+            border-color: #667eea;
+        }
+        .session-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+        .session-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .session-id {
+            font-size: 10px;
+            opacity: 0.7;
+        }
+        .toggle-sidebar-btn {
+            position: fixed;
+            left: -35px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1001;
+            padding: 15px 20px 15px 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 0 12px 12px 0;
+            box-shadow: 3px 0 15px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: bold;
+            border: none;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            will-change: transform, left;
+        }
+        .toggle-sidebar-btn::before {
+            content: '📋';
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+        .toggle-sidebar-btn:hover {
+            left: 0;
+            transform: translateY(-50%) translateX(0);
+            box-shadow: 5px 0 25px rgba(102, 126, 234, 0.6);
+        }
+        .toggle-sidebar-btn:hover::before {
+            transform: translateY(-50%) scale(1.2) translateX(5px);
+        }
+        /* 侧边栏打开时隐藏切换按钮 */
+        .sidebar.active ~ .toggle-sidebar-btn {
+            left: 300px;
+            opacity: 0;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
-    <div class="chat-container">
+    <!-- 遮罩层 -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- 会话侧边栏 -->
+    <div id="sessionSidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h3>💬 历史会话</h3>
+            <button class="sidebar-close-btn" onclick="toggleSidebar()"></button>
+        </div>
+        <div id="sessionList"></div>
+    </div>
+
+    <!-- 切换按钮 -->
+    <button class="toggle-sidebar-btn" onclick="toggleSidebar()">会话列表</button>
+
+    <div class="main-wrapper">
+        <div class="chat-container">
         <div class="header">
             <h1>🤖 Spring AI 聊天助手</h1>
             <p>基于 Spring AI 框架的智能对话系统（支持多轮对话）</p>
@@ -296,6 +493,9 @@
             </div>
         </div>
     </div>
+
+    <!-- 遮罩层 -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
     <!-- 历史查看弹窗 -->
     <div id="historyModal" class="history-modal">
@@ -442,6 +642,63 @@
                 closeHistory();
             }
         });
+
+        // 切换侧边栏
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sessionSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const mainWrapper = document.querySelector('.main-wrapper');
+            
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            if (sidebar.classList.contains('active')) {
+                mainWrapper.style.marginLeft = '300px';
+                loadSessionList();
+            } else {
+                mainWrapper.style.marginLeft = '0';
+            }
+        }
+
+        // 加载会话列表
+        async function loadSessionList() {
+            try {
+                const response = await fetch(`${API_BASE}/sessions`);
+                const data = await response.json();
+                const sessionList = document.getElementById('sessionList');
+                
+                if (data.sessions && data.sessions.length > 0) {
+                    let html = '';
+                    data.sessions.forEach(session => {
+                        const isActive = session.id === currentSessionId ? 'active' : '';
+                        html += `
+                            <div class="session-item ${isActive}" onclick="switchSession('${session.id}')">
+                                <div class="session-title">${escapeHtml(session.title)}</div>
+                                <div class="session-id">ID: ${session.id.substring(session.id.length - 8)}</div>
+                            </div>
+                        `;
+                    });
+                    sessionList.innerHTML = html;
+                } else {
+                    sessionList.innerHTML = '<p style="text-align: center; color: #999;">暂无其他会话</p>';
+                }
+            } catch (error) {
+                console.error('加载会话列表失败:', error);
+            }
+        }
+
+        // 切换会话
+        function switchSession(sessionId) {
+            currentSessionId = sessionId;
+            localStorage.setItem('chat_session_id', currentSessionId);
+            updateSessionIdDisplay();
+            clearMessages();
+            toggleSidebar(); // 关闭侧边栏
+            addMessage(`✨ 已切换到会话: ${sessionId.substring(sessionId.length - 8)}`, false);
+            
+            // 重新加载会话列表以更新高亮状态
+            setTimeout(() => loadSessionList(), 300);
+        }
 
         async function sendMessage() {
             const input = document.getElementById('messageInput');

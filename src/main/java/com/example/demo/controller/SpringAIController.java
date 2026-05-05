@@ -7,7 +7,9 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -301,6 +303,28 @@ public class SpringAIController {
         result.put("sessionId", sessionId);
         result.put("history", history);
         result.put("count", history.size());
+        return result;
+    }
+
+    /**
+     * 获取所有活跃会话列表接口
+     * @return 会话列表（包含ID和标题）
+     */
+    @GetMapping("/sessions")
+    public Map<String, Object> getAllSessions() {
+        java.util.List<String> sessionIds = chatMemoryService.getAllSessionIds();
+        java.util.List<Map<String, String>> sessions = new ArrayList<>();
+        
+        for (String id : sessionIds) {
+            Map<String, String> sessionInfo = new HashMap<>();
+            sessionInfo.put("id", id);
+            sessionInfo.put("title", chatMemoryService.getSessionTitle(id));
+            sessions.add(sessionInfo);
+        }
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("sessions", sessions);
+        result.put("count", sessions.size());
         return result;
     }
 }

@@ -53,6 +53,15 @@
             transform: translateY(-10px);
             box-shadow: 0 15px 40px rgba(0,0,0,0.2);
         }
+        .card-rag {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .card-rag h2,
+        .card-rag p,
+        .card-rag li {
+            color: white;
+        }
         .card-icon {
             font-size: 48px;
             margin-bottom: 15px;
@@ -83,6 +92,10 @@
             background-color: #4ecdc4;
             color: white;
         }
+        .badge-rag {
+            background-color: #ff6b9d;
+            color: white;
+        }
         .features {
             text-align: left;
             margin-top: 15px;
@@ -100,6 +113,19 @@
         <p class="subtitle">基于 Spring 官方 AI 框架的智能对话系统</p>
         
         <div class="cards">
+            <a href="/rag-chat.html" class="card card-rag">
+                <div class="card-icon">🧠</div>
+                <h2>RAG 智能问答</h2>
+                <span class="badge badge-rag">检索增强生成</span>
+                <p>基于知识库的智能问答系统，提供准确、可追溯的回答</p>
+                <ul class="features">
+                    <li>✅ 文档管理和索引</li>
+                    <li>✅ 向量相似度搜索</li>
+                    <li>✅ 智能问答（流式/非流式）</li>
+                    <li>✅ 自动加载示例数据</li>
+                </ul>
+            </a>
+            
             <a href="/spring-ai-chat.html" class="card">
                 <div class="card-icon">🌱</div>
                 <h2>Spring AI 聊天</h2>
@@ -130,8 +156,9 @@
         <div style="margin-top: 40px; padding-top: 30px; border-top: 2px solid #f0f0f0;">
             <h3 style="color: #667eea; margin-bottom: 15px;">💡 提示</h3>
             <p style="color: #666; line-height: 1.8;">
-                • 两个页面都支持流式响应和系统提示设置<br>
-                • 推荐使用 spring-ai-chat.html 获得更好的视觉体验<br>
+                • RAG 智能问答：基于知识库的检索增强生成系统<br>
+                • spring-ai-chat.html：推荐的现代化聊天界面<br>
+                • chat.html：简洁版聊天界面<br>
                 • 所有配置都在 application.properties 中管理
             </p>
         </div>

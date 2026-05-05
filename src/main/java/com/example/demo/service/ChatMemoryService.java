@@ -101,4 +101,28 @@ public class ChatMemoryService {
     public List<Map<String, String>> getSessionHistory(String sessionId) {
         return new ArrayList<>(getOrCreateHistory(sessionId));
     }
+
+    /**
+     * 获取所有活跃会话的ID列表
+     * @return 会话ID列表
+     */
+    public List<String> getAllSessionIds() {
+        return new ArrayList<>(sessionHistories.keySet());
+    }
+
+    /**
+     * 获取指定会话的第一条用户消息作为会话标题（简化版）
+     * @param sessionId 会话ID
+     * @return 会话标题
+     */
+    public String getSessionTitle(String sessionId) {
+        List<Map<String, String>> history = getOrCreateHistory(sessionId);
+        for (Map<String, String> msg : history) {
+            if ("user".equals(msg.get("role"))) {
+                String content = msg.get("content");
+                return content.length() > 20 ? content.substring(0, 20) + "..." : content;
+            }
+        }
+        return "新会话 " + sessionId.substring(Math.max(0, sessionId.length() - 8));
+    }
 }
