@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring AI 聊天</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .chat-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .header h1 {
+            color: #667eea;
+            margin: 0;
+            font-size: 28px;
+        }
+        .header p {
+            color: #666;
+            margin: 5px 0 0 0;
+            font-size: 14px;
+        }
+        .messages {
+            height: 450px;
+            overflow-y: auto;
+            border: 2px solid #e0e0e0;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            background-color: #fafafa;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            line-height: 1.6;
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .user-message {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: 20%;
+            border-bottom-right-radius: 2px;
+        }
+        .ai-message {
+            background-color: #f0f0f0;
+            color: #333;
+            margin-right: 20%;
+            border-bottom-left-radius: 2px;
+        }
+        .input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        #messageInput {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        #messageInput:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        .option-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #555;
+        }
+        input[type="checkbox"] {
+            cursor: pointer;
+        }
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-style: italic;
+            padding: 10px;
+        }
+        .streaming-cursor::after {
+            content: '|';
+            animation: blink 1s infinite;
+            color: #667eea;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        .system-prompt-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            resize: vertical;
+        }
+        .system-prompt-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .toggle-system-prompt {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="header">
+            <h1>🤖 Spring AI 聊天助手</h1>
+            <p>基于 Spring AI 框架的智能对话系统（支持多轮对话）</p>
+            <p style="font-size: 12px; color: #999; margin-top: 5px;">会话ID: <span id="sessionId">加载中...</span></p>
+        </div>
+        
+        <div class="messages" id="messages"></div>
+        
+        <div class="toggle-system-prompt">
+            <label>
+                <input type="checkbox" id="showSystemPrompt" onchange="toggleSystemPrompt()"> 
+                显示系统提示设置
+            </label>
+        </div>
+        
+        <div id="systemPromptContainer" style="display: none;">
+            <textarea 
+                id="systemPromptInput" 
+                class="system-prompt-input" 
+                rows="2"
+                placeholder="输入系统提示（可选），例如：你是一个专业的编程助手">你是一个有用的AI助手</textarea>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="输入消息..." />
+            <button onclick="sendMessage()" id="sendBtn">发送</button>
+        </div>
+        
+        <div class="options">
+            <div class="option-group">
+                <label>
+                    <input type="checkbox" id="streamMode" checked> 
+                    启用流式响应
+                </label>
+                <label>
+                    <input type="checkbox" id="enableMemory" checked> 
+                    启用多轮对话记忆
+                </label>
+            </div>
+            <div class="option-group">
+                <button onclick="clearMessages()" style="padding: 8px 16px; font-size: 12px;">清空对话</button>
+                <button onclick="clearSessionMemory()" style="padding: 8px 16px; font-size: 12px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">清除记忆</button>
+                <button onclick="newSession()" style="padding: 8px 16px; font-size: 12px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">新会话</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API 基础路径
+        const API_BASE = '/api/spring-ai';
+        
+        // 生成或获取会话ID
+        let currentSessionId = localStorage.getItem('chat_session_id');
+        if (!currentSessionId) {
+            currentSessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('chat_session_id', currentSessionId);
+        }
+        
+        // 显示会话ID
+        function updateSessionIdDisplay() {
+            const sessionIdElement = document.getElementById('sessionId');
+            if (sessionIdElement) {
+                sessionIdElement.textContent = currentSessionId;
+            }
+        }
+        
+        function toggleSystemPrompt() {
+            const container = document.getElementById('systemPromptContainer');
+            const checkbox = document.getElementById('showSystemPrompt');
+            container.style.display = checkbox.checked ? 'block' : 'none';
+        }
+        
+        function addMessage(text, isUser) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+            messageDiv.textContent = text;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            return messageDiv;
+        }
+        
+        function clearMessages() {
+            document.getElementById('messages').innerHTML = '';
+        }
+        
+        // 清除会话记忆
+        async function clearSessionMemory() {
+            try {
+                const response = await fetch(`${API_BASE}/clear-memory`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ sessionId: currentSessionId })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    addMessage('✅ 会话记忆已清除，可以开始新的对话', false);
+                }
+            } catch (error) {
+                console.error('清除记忆失败:', error);
+                addMessage('❌ 清除记忆失败: ' + error.message, false);
+            }
+        }
+        
+        // 创建新会话
+        function newSession() {
+            // 生成新的会话ID
+            currentSessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('chat_session_id', currentSessionId);
+            updateSessionIdDisplay();
+            
+            // 清空对话
+            clearMessages();
+            
+            // 显示欢迎消息
+            addMessage('✨ 已创建新会话，让我们开始新的对话吧！', false);
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const streamMode = document.getElementById('streamMode').checked;
+            const useSystemPrompt = document.getElementById('showSystemPrompt').checked;
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // 添加用户消息
+            addMessage(message, true);
+            input.value = '';
+            
+            // 禁用发送按钮
+            sendBtn.disabled = true;
+            sendBtn.textContent = '发送中...';
+            
+            // 显示加载状态
+            const messagesDiv = document.getElementById('messages');
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading';
+            loadingDiv.textContent = 'AI正在思考...';
+            loadingDiv.id = 'loading';
+            messagesDiv.appendChild(loadingDiv);
+            
+            try {
+                if (streamMode) {
+                    // 使用流式响应
+                    await sendStreamMessage(message, useSystemPrompt);
+                } else {
+                    // 使用普通响应
+                    await sendNormalMessage(message, useSystemPrompt);
+                }
+            } catch (error) {
+                const loadingElement = document.getElementById('loading');
+                if (loadingElement) loadingElement.remove();
+                addMessage('请求失败: ' + error.message, false);
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = '发送';
+            }
+        }
+        
+        async function sendNormalMessage(message, useSystemPrompt) {
+            let url, body;
+            const enableMemory = document.getElementById('enableMemory').checked;
+            
+            if (useSystemPrompt) {
+                const systemPrompt = document.getElementById('systemPromptInput').value || '你是一个有用的AI助手';
+                if (enableMemory) {
+                    url = `${API_BASE}/chat-with-memory-and-system`;
+                    body = JSON.stringify({ 
+                        sessionId: currentSessionId,
+                        systemMessage: systemPrompt,
+                        userMessage: message 
+                    });
+                } else {
+                    url = `${API_BASE}/chat-with-system`;
+                    body = JSON.stringify({ 
+                        systemMessage: systemPrompt,
+                        userMessage: message 
+                    });
+                }
+            } else {
+                if (enableMemory) {
+                    url = `${API_BASE}/chat-with-memory`;
+                    body = JSON.stringify({ 
+                        sessionId: currentSessionId,
+                        message: message 
+                    });
+                } else {
+                    url = `${API_BASE}/chat`;
+                    body = JSON.stringify({ message: message });
+                }
+            }
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: body
+            });
+            
+            const data = await response.json();
+            
+            // 移除加载提示
+            const loadingElement = document.getElementById('loading');
+            if (loadingElement) loadingElement.remove();
+            
+            if (data.response) {
+                addMessage(data.response, false);
+            } else if (data.error) {
+                addMessage('错误: ' + data.error, false);
+            }
+        }
+        
+        async function sendStreamMessage(message, useSystemPrompt) {
+            // 创建空的AI消息容器
+            const aiMessageDiv = addMessage('', false);
+            aiMessageDiv.classList.add('streaming-cursor');
+            
+            // 移除加载提示
+            const loadingElement = document.getElementById('loading');
+            if (loadingElement) loadingElement.remove();
+            
+            const enableMemory = document.getElementById('enableMemory').checked;
+            let url, body;
+            
+            if (useSystemPrompt) {
+                const systemPrompt = document.getElementById('systemPromptInput').value || '你是一个有用的AI助手';
+                if (enableMemory) {
+                    url = `${API_BASE}/chat-stream-with-memory-and-system`;
+                    body = JSON.stringify({ 
+                        sessionId: currentSessionId,
+                        systemMessage: systemPrompt,
+                        userMessage: message 
+                    });
+                } else {
+                    url = `${API_BASE}/chat-stream-with-system`;
+                    body = JSON.stringify({ 
+                        systemMessage: systemPrompt,
+                        userMessage: message 
+                    });
+                }
+            } else {
+                if (enableMemory) {
+                    url = `${API_BASE}/chat-stream-with-memory`;
+                    body = JSON.stringify({ 
+                        sessionId: currentSessionId,
+                        message: message 
+                    });
+                } else {
+                    url = `${API_BASE}/chat-stream`;
+                    body = JSON.stringify({ message: message });
+                }
+            }
+            
+            // 使用 fetch + ReadableStream 处理流式响应
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: body
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let accumulatedText = '';
+            let buffer = ''; // 添加缓冲区处理不完整的数据行
+            
+            try {
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value, { stream: true });
+                    buffer += chunk; // 将新数据添加到缓冲区
+                    
+                    // 按行分割缓冲区
+                    const lines = buffer.split('\n');
+                    // 保留最后一个不完整的行在缓冲区中
+                    buffer = lines.pop() || '';
+                    
+                    // 处理完整的行
+                    for (const line of lines) {
+                        const trimmedLine = line.trim();
+                        if (trimmedLine.startsWith('data:')) {
+                            // 支持 "data:" 和 "data: " 两种格式
+                            const data = trimmedLine.startsWith('data: ') 
+                                ? trimmedLine.slice(6) 
+                                : trimmedLine.slice(5);
+                            if (data && data !== '[DONE]') {
+                                accumulatedText += data;
+                                aiMessageDiv.textContent = accumulatedText;
+                                // 滚动到底部
+                                const messagesDiv = document.getElementById('messages');
+                                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                            }
+                        }
+                    }
+                }
+                
+                // 处理缓冲区中剩余的数据
+                if (buffer.trim()) {
+                    const trimmedLine = buffer.trim();
+                    if (trimmedLine.startsWith('data: ')) {
+                        const data = trimmedLine.slice(6);
+                        if (data && data !== '[DONE]') {
+                            accumulatedText += data;
+                            aiMessageDiv.textContent = accumulatedText;
+                        }
+                    }
+                }
+            } finally {
+                reader.releaseLock();
+                aiMessageDiv.classList.remove('streaming-cursor');
+            }
+        }
+
+        // 按回车键发送消息
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // 页面加载时显示欢迎消息
+        window.onload = function() {
+            updateSessionIdDisplay();
+            addMessage('你好！我是基于 Spring AI 的聊天助手。有什么可以帮助你的吗？', false);
+            addMessage('💡 提示：已启用多轮对话记忆功能，我可以记住我们的对话历史哦！', false);
+        };
+    </script>
+</body>
+</html>

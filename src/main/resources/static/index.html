@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring AI 聊天平台</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 36px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        .card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 30px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        .card h2 {
+            color: #667eea;
+            margin: 10px 0;
+            font-size: 24px;
+        }
+        .card p {
+            color: #555;
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .badge-langchain {
+            background-color: #ff6b6b;
+            color: white;
+        }
+        .badge-spring {
+            background-color: #4ecdc4;
+            color: white;
+        }
+        .features {
+            text-align: left;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .features li {
+            margin: 8px 0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Spring AI 聊天平台</h1>
+        <p class="subtitle">基于 Spring 官方 AI 框架的智能对话系统</p>
+        
+        <div class="cards">
+            <a href="/spring-ai-chat.html" class="card">
+                <div class="card-icon">🌱</div>
+                <h2>Spring AI 聊天</h2>
+                <span class="badge badge-spring">现代化 UI</span>
+                <p>专为 Spring AI 设计的现代化聊天界面，提供最佳用户体验</p>
+                <ul class="features">
+                    <li>✅ 流式响应支持</li>
+                    <li>✅ 系统提示设置</li>
+                    <li>✅ 渐变 UI 设计</li>
+                    <li>✅ 清空对话功能</li>
+                </ul>
+            </a>
+            
+            <a href="/chat.html" class="card">
+                <div class="card-icon">💬</div>
+                <h2>简洁聊天</h2>
+                <span class="badge badge-spring">简洁版</span>
+                <p>简洁的聊天界面，快速开始对话</p>
+                <ul class="features">
+                    <li>✅ 轻量级设计</li>
+                    <li>✅ 快速响应</li>
+                    <li>✅ 简单易用</li>
+                    <li>✅ 流式支持</li>
+                </ul>
+            </a>
+        </div>
+        
+        <div style="margin-top: 40px; padding-top: 30px; border-top: 2px solid #f0f0f0;">
+            <h3 style="color: #667eea; margin-bottom: 15px;">💡 提示</h3>
+            <p style="color: #666; line-height: 1.8;">
+                • 两个页面都支持流式响应和系统提示设置<br>
+                • 推荐使用 spring-ai-chat.html 获得更好的视觉体验<br>
+                • 所有配置都在 application.properties 中管理
+            </p>
+        </div>
+    </div>
+</body>
+</html>
